@@ -1,6 +1,7 @@
 package com.selector.controller;
 
 import java.io.File;
+import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -10,39 +11,52 @@ import org.w3c.dom.NodeList;
 
 public class XmlReader {
 
-    public void parser(String name) {
+    public Map<String, Object> parser(Map<String, Object> payload) {
         try {
 
-            File stocks = new File("src/main/java/com/selector/controller/services/"+name+".xml");
+            File stocks = new File("src/main/java/com/selector/controller/services/" + payload.get("service") + ".xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(stocks);
             doc.getDocumentElement().normalize();
 
-            System.out.println("root of xml file " + doc.getDocumentElement().getNodeName());
-            NodeList nodes = doc.getElementsByTagName("MICROSERVICEVALIDATOR");
-            System.out.println("==========================");
+            NodeList flowList = doc.getElementsByTagName("MICROSERVICEVALIDATOR");
 
-            for (int i = 0; i < nodes.getLength(); i++) {
-                Node node = nodes.item(i);
+            for (int i = 0; i < flowList.getLength(); i++) {
 
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element element = (Element) node;
-                    System.out.println("Service: " + getValue("SERVICE", element));
-                    System.out.println("PAYEE: " + getValue("PAYEE", element));
-                    System.out.println("PAYER: " + getValue("PAYER", element));
-                    System.out.println("AMOUNT: " + getValue("AMOUNT", element));
+                NodeList childList = flowList.item(0).getChildNodes();
+                for (int j = 0; j < childList.getLength(); j++) {
+                    Node childNode = childList.item(j);
+                    if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+                        payload.put(childNode.getNodeName() ,childList.item(j).getTextContent().trim());
+                    }
+
+
                 }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+
+            NodeList flowList1 = doc.getElementsByTagName("MICROSERVICEROLES");
+
+            for (int i = 0; i < flowList1.getLength(); i++) {
+
+                NodeList childList1 = flowList1.item(0).getChildNodes();
+                for (int j = 0; j < childList1.getLength(); j++) {
+                    Node childNode = childList1.item(j);
+                    if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+                        payload.put(childNode.getNodeName() ,childList1.item(j).getTextContent().trim());
+                    }
+
+
+                }
+            }
+
     }
 
-    private static String getValue(String tag, Element element) {
-        NodeList nodes = element.getElementsByTagName(tag).item(0).getChildNodes();
-        Node node = (Node) nodes.item(0);
-        return node.getNodeValue();
+        catch (Exception ex) {
+            System.out.println("File does not exist");
+        }
+        return  payload;
     }
+
 }
 

@@ -9,11 +9,14 @@ import java.util.HashMap;
 public class Receiver {
     private static final Logger logger =
             LoggerFactory.getLogger(Receiver.class);
-
+    RolesValidator objXml=new RolesValidator();
     public void handleMessage(HashMap<String,Object> mailMap){
 
 
-            System.out.println("mail queue..................................." + mailMap);
+            if ("YES".equals(mailMap.get("ISROLEAPPLICABLE")))
+            {
+                objXml.rolesvalidation();
+            }
 
     }
 }
